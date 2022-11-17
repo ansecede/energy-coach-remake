@@ -67,9 +67,15 @@ const LoginScreen = () => {
           }}>
           <TextInput
             placeholder={'Username'}
+            placeholderTextColor="gray"
             value={userName}
             onChangeText={userName => setUserName(userName)}
-            style={{ borderColor: 'grey', borderWidth: 1, borderRadius: 5 }}
+            style={{
+              borderColor: 'grey',
+              borderWidth: 1,
+              borderRadius: 5,
+              color: 'black',
+            }}
           />
         </View>
         <Text
@@ -84,10 +90,16 @@ const LoginScreen = () => {
         <View style={{ padding: 2, width: '60%', margin: 10 }}>
           <TextInput
             placeholder={'Password'}
+            placeholderTextColor="gray"
             value={password}
             secureTextEntry={true}
             onChangeText={password => setPassword(password)}
-            style={{ borderColor: 'grey', borderWidth: 1, borderRadius: 5 }}
+            style={{
+              borderColor: 'grey',
+              borderWidth: 1,
+              borderRadius: 5,
+              color: 'black',
+            }}
           />
         </View>
         {/* Cambiar el Button por FormButton, que debe ser un archivo .js */}
