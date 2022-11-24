@@ -87,11 +87,11 @@ const HomeScreen = () => {
   };
 
   useEffect(() => {
-    const recomendatioRef = collection(fsdb, 'recommendations');
+    const recomendatioRef = collection(fsdb, 'recomendations');
     const q = query(recomendatioRef, orderBy('datetime', 'desc'), limit(1));
     const unsub = onSnapshot(q, querySnapshot => {
       console.log('snapshot', querySnapshot);
-      querySnapshot.docs.map(function (doc) {
+      querySnapshot.forEach(doc => {
         let item = doc.data();
         // let option = item.option;
         setControlAC(item.option);
