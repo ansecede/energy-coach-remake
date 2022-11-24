@@ -15,6 +15,8 @@ import {
   orderBy,
   limit,
   onSnapshot,
+  doc,
+  setDoc,
 } from 'firebase/firestore';
 import { off, onValue, ref, set } from 'firebase/database';
 import { screenHeight, screenWidth } from '../utils/Dimensions';
@@ -66,6 +68,15 @@ const HomeScreen = () => {
     });
   };
 
+  // const prueba = async number => {
+  //   const current_date = new Date();
+  //   await setDoc(doc(fsdb, 'CollectionPrueba', 'Poninmalta'), {
+  //     number: number,
+  //     date: current_date,
+  //     flag: 'por fin se puedo',
+  //   });
+  // };
+
   const aceptedRecommendation = number => {
     //1 aceptado 0 rechazado
     const current_date = new Date();
@@ -92,38 +103,123 @@ const HomeScreen = () => {
     return () => unsub;
   }, []);
 
-  let cases = [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 17, 18, 19, 20, 21, 22, 23, 24,
-  ];
-
-  let matchingChanged_value = [
-    22, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 0, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-  ];
-  let rec_n_energy = [
-    { recomendation: 'Encender AC', energy: '0%' },
-    { recomendation: 'Apagar AC', energy: '10%' },
-    { recomendation: 'Cambiar temperatura a 16º', energy: '5%' },
-    { recomendation: 'Cambiar temperatura a 17º', energy: '0%' },
-    { recomendation: 'Cambiar temperatura a 18º', energy: '0%' },
-    { recomendation: 'Cambiar temperatura a 19º', energy: '0%' },
-    { recomendation: 'Cambiar temperatura a 20º', energy: '0%' },
-    { recomendation: 'Cambiar temperatura a 21º', energy: '0%' },
-    { recomendation: 'Cambiar temperatura a 22º', energy: '0%' },
-    { recomendation: 'Cambiar temperatura a 23º', energy: '0%' },
-    { recomendation: 'Cambiar temperatura a 24º', energy: '0%' },
-    { recomendation: 'Mantener estadoº', energy: '0%' },
-  ];
-
   const convertCode = value_to_change => {
     let changed_value;
-    changed_value = matchingChanged_value[cases.indexOf(value_to_change)];
+    switch (value_to_change) {
+      case 1:
+        changed_value = 22;
+        break;
+      case 3:
+        changed_value = 16;
+        break;
+      case 4:
+        changed_value = 17;
+        break;
+      case 5:
+        changed_value = 18;
+        break;
+      case 6:
+        changed_value = 19;
+        break;
+      case 7:
+        changed_value = 20;
+        break;
+      case 8:
+        changed_value = 21;
+        break;
+      case 9:
+        changed_value = 22;
+        break;
+      case 10:
+        changed_value = 23;
+        break;
+      case 11:
+        changed_value = 24;
+        break;
+      case 24:
+        changed_value = 11;
+        break;
+      case 23:
+        changed_value = 10;
+        break;
+      case 22:
+        changed_value = 9;
+        break;
+      case 21:
+        changed_value = 8;
+        break;
+      case 20:
+        changed_value = 7;
+        break;
+      case 19:
+        changed_value = 6;
+        break;
+      case 18:
+        changed_value = 5;
+        break;
+      case 17:
+        changed_value = 4;
+        break;
+      case 16:
+        changed_value = 3;
+        break;
+    }
     return changed_value;
   };
 
-  let recommendation = 'Cambiar temperatura a 17º';
-  // recommendation = rec_n_energy[cases.indexOf(controlAC)]['recomendation'];
-  let energy_saving = '0%';
-  // energy_saving = rec_n_energy[cases.indexOf(controlAC)]['energy'];
+  let recommendation = '';
+  let energy_saving = '';
+
+  switch (controlAC) {
+    case 1:
+      recommendation = 'Encender AC';
+      energy_saving = '0%';
+      break;
+    case 2:
+      recommendation = 'Apagar AC';
+      energy_saving = '10%';
+      break;
+    case 3:
+      recommendation = 'Cambiar temperatura a 16º';
+      energy_saving = '5%';
+      break;
+    case 4:
+      recommendation = 'Cambiar temperatura a 17º';
+      energy_saving = '0%';
+      break;
+    case 5:
+      recommendation = 'Cambiar temperatura a 18º';
+      energy_saving = '0%';
+      break;
+    case 6:
+      recommendation = 'Cambiar temperatura a 19º';
+      energy_saving = '0%';
+      break;
+    case 7:
+      recommendation = 'Cambiar temperatura a 20º';
+      energy_saving = '0%';
+      break;
+    case 8:
+      recommendation = 'Cambiar temperatura a 21º';
+      energy_saving = '0%';
+      break;
+    case 9:
+      recommendation = 'Cambiar temperatura a 22º';
+      energy_saving = '0%';
+      break;
+    case 10:
+      recommendation = 'Cambiar temperatura a 23º';
+      energy_saving = '0%';
+      break;
+    case 11:
+      recommendation = 'Cambiar temperatura a 24º';
+      energy_saving = '0%';
+      break;
+    case 11:
+      recommendation = 'Mantener estadoº';
+      energy_saving = '0%';
+      break;
+  }
 
   return (
     // Modal o pop up de notificación
