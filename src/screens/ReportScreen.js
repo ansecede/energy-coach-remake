@@ -55,55 +55,99 @@ const ReportScreen = () => {
     ],
   };
 
-  return (
-    <View
-      style={{
-        backgroundColor: '#ffff',
-        width: '100%',
-        height: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
+  function Loading() {
+    return (
       <View
         style={{
-          borderWidth: 2,
-          height: '8%',
-          aspectRatio: 6 / 1,
-          borderColor: '#52ADEB',
-          borderRadius: 15,
-          justifyContent: 'center',
+          backgroundColor: '#ffff',
+          width: '100%',
+          height: '100%',
           alignItems: 'center',
+          justifyContent: 'center',
         }}>
-        <Text
+        <View
           style={{
-            color: 'black',
+            borderWidth: 2,
+            height: '8%',
+            aspectRatio: 6 / 1,
+            borderColor: '#52ADEB',
+            borderRadius: 15,
             justifyContent: 'center',
             alignItems: 'center',
-            textAlign: 'center',
-            fontWeight: 'bold',
-            fontSize: 20,
           }}>
-          Cantidad de votos
-        </Text>
+          <Text
+            style={{
+              color: 'black',
+              justifyContent: 'center',
+              alignItems: 'center',
+              textAlign: 'center',
+              fontWeight: 'bold',
+              fontSize: 20,
+            }}>
+            Cargando tabla...
+          </Text>
+        </View>
       </View>
-      {dataRandom.datasets[0].data.length > 0 && (
-        <BarChart
-          data={dataRandom}
-          width={screenWidth}
-          height={screenHeight - 200}
-          chartConfig={chartConfig}
-          withHorizontalLabels={false}
-          withCustomBarColorFromData={true}
-          flatColor={true}
-          showValuesOnTopOfBars={true}
-          fromZero={true}
+    );
+  }
+
+  function Loaded() {
+    return (
+      <View
+        style={{
+          backgroundColor: '#ffff',
+          width: '100%',
+          height: '100%',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+        <View
           style={{
-            marginVertical: 10,
-          }}
-        />
-      )}
-    </View>
-  );
+            borderWidth: 2,
+            height: '8%',
+            aspectRatio: 6 / 1,
+            borderColor: '#52ADEB',
+            borderRadius: 15,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <Text
+            style={{
+              color: 'black',
+              justifyContent: 'center',
+              alignItems: 'center',
+              textAlign: 'center',
+              fontWeight: 'bold',
+              fontSize: 20,
+            }}>
+            Cantidad de votos
+          </Text>
+        </View>
+        {dataRandom.datasets[0].data.length > 0 && (
+          <BarChart
+            data={dataRandom}
+            width={screenWidth}
+            height={screenHeight - 200}
+            chartConfig={chartConfig}
+            withHorizontalLabels={false}
+            withCustomBarColorFromData={true}
+            flatColor={true}
+            showValuesOnTopOfBars={true}
+            fromZero={true}
+            style={{
+              marginVertical: 10,
+            }}
+          />
+        )}
+      </View>
+    );
+  }
+
+  if (votes.length != 0) {
+    return <Loaded />;
+  }
+
+  return <Loading />;
 };
 
 export default ReportScreen;
