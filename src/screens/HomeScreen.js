@@ -15,10 +15,17 @@ import {
   orderBy,
   limit,
   onSnapshot,
-  doc,
-  setDoc,
 } from 'firebase/firestore';
-import { off, onValue, ref, set } from 'firebase/database';
+import {
+  child,
+  get,
+  increment,
+  off,
+  onValue,
+  ref,
+  set,
+  update,
+} from 'firebase/database';
 import { screenHeight, screenWidth } from '../utils/Dimensions';
 import { Slider, Icon } from '@rneui/themed';
 import FormButton from '../utils/FormButton';
@@ -29,6 +36,11 @@ const HomeScreen = () => {
   const [value, setValue] = useState(0);
   const [temperature, setTemperature] = useState(0);
   const [comfort, setComfort] = useState('');
+  const [comfortStates, setComfortStates] = useState([
+    'cold',
+    'neutral',
+    'hot',
+  ]);
 
   // Para los botones on off
   let [typeIconOn, setTypeOn] = useState('radio-button-off-sharp');
@@ -42,9 +54,12 @@ const HomeScreen = () => {
     });
   };
 
-  const setUserComfort = async value => {
-    set(ref(rtdb, '/comfort'), {
-      value: value,
+  const incrementUserComfort = async value => {
+    const comfortState = comfortStates[value];
+    const dbRef = ref(rtdb, '/comfort');
+
+    await update(dbRef, {
+      [comfortState]: increment(1),
     });
   };
 
@@ -56,17 +71,6 @@ const HomeScreen = () => {
     // Stop listening for updates when no longer required
     return () => off(recomendation, listener);
   }, []);
-
-  const addComfort = (level, code) => {
-    const current_date = new Date();
-    addDoc(collection(fsdb, 'Comfort'), {
-      comfortLevel: level,
-      comfortCode: code,
-      date: current_date,
-    }).then(() => {
-      console.log('Comfort added!');
-    });
-  };
 
   // const prueba = async number => {
   //   const current_date = new Date();
@@ -594,8 +598,7 @@ const HomeScreen = () => {
           {/* Frio */}
           <TouchableHighlight
             onPress={() => {
-              setUserComfort(0).then(setComfort('Frio'));
-              addComfort('Cold', '0');
+              incrementUserComfort(0).then(setComfort('Frio'));
             }}
             underlayColor="transparent"
             activeOpacity={0}>
@@ -614,8 +617,7 @@ const HomeScreen = () => {
           {/* Neutral */}
           <TouchableHighlight
             onPress={() => {
-              setUserComfort(1).then(setComfort('Neutral'));
-              addComfort('Neutral', '1');
+              incrementUserComfort(1).then(setComfort('Neutral'));
             }}
             underlayColor="transparent"
             activeOpacity={0}>
@@ -634,8 +636,7 @@ const HomeScreen = () => {
           {/* Calor */}
           <TouchableHighlight
             onPress={() => {
-              setUserComfort(2).then(setComfort('Calor'));
-              addComfort('Hot', '2');
+              incrementUserComfort(2).then(setComfort('Calor'));
             }}
             underlayColor="transparent"
             activeOpacity={0}>

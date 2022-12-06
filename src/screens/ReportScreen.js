@@ -1,37 +1,34 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
-import { screenWidth } from '../utils/Dimensions';
+import { StackedBarChart } from 'react-native-chart-kit';
+import { screenHeight, screenWidth } from '../utils/Dimensions';
 
 const ReportScreen = () => {
   const chartConfig = {
-    backgroundColor: '#e26a00',
-    backgroundGradientFrom: '#ffff',
-    backgroundGradientTo: '#ffff',
+    backgroundGradientFrom: '#57c4ea',
+    backgroundGradientFromOpacity: 1,
+    backgroundGradientTo: '#ffffff',
     backgroundGradientToOpacity: 0.5,
-    color: (opacity = 1) => 'rgba(0, 0, 0, ' + opacity + ')',
+    color: (opacity = 1) => 'rgba(26, 255, 146, ' + opacity + ')',
     labelColor: (opacity = 1) => 'rgba(0, 0, 0, ' + opacity + ')',
-    strokeWidth: 2, // optional, default 3
-    barPercentage: 0.5,
+    strokeWidth: 3, // optional, default 3
+    barPercentage: 0.7,
     useShadowColorFromDataset: false, // optional
+    propsForVerticalLabels: { fontWeight: 'bold' },
   };
 
   const dataRandom = {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-    datasets: [
-      {
-        data: [
-          Math.random() * 100,
-          Math.random() * 100,
-          Math.random() * 100,
-          Math.random() * 100,
-          Math.random() * 100,
-          Math.random() * 100,
-        ],
-        color: (opacity = 1) => 'rgba(0, 0, 0, ' + opacity + ')',
-      },
+    labels: ['MO', 'TU', 'WE', 'TH', 'FR'],
+    legend: ['Cold', 'Neutral', 'Hot'],
+    data: [
+      [60, 60, 60],
+      [30, 30, 60],
+      [30, 30, 60],
+      [30, 30, 60],
+      [30, 30, 60],
     ],
-    legend: ['Consumption'],
+    // color: (opacity = 1) => 'rgba(0, 0, 0, ' + opacity + ')',
+    barColors: ['#359afb', '#a4b0be', '#ea8535'],
   };
 
   return (
@@ -43,68 +40,37 @@ const ReportScreen = () => {
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-      <Text
+      <View
         style={{
-          padding: 25,
-          justifyContent: 'center',
-          alignItems: 'center',
-          textAlign: 'center',
-          width: '90%',
-          fontWeight: 'bold',
-          height: '10%',
           borderWidth: 2,
+          height: '8%',
+          aspectRatio: 6 / 1,
           borderColor: '#52ADEB',
           borderRadius: 15,
-          margin: 10,
-          fontSize: 16,
-        }}>
-        Tabla de Consumo en edificio
-      </Text>
-      {dataRandom.datasets[0].data.length > 0 && (
-        <LineChart
-          data={dataRandom}
-          width={screenWidth}
-          height={220}
-          yAxisSuffix=" Kw"
-          yAxisInterval={1} // optional, defaults to 1
-          chartConfig={chartConfig}
-          bezier
-          style={{
-            marginVertical: 0,
-            borderRadius: 10,
-          }}
-        />
-      )}
-      <Text
-        style={{
-          padding: 25,
           justifyContent: 'center',
           alignItems: 'center',
-          textAlign: 'center',
-          width: '90%',
-          fontWeight: 'bold',
-          height: '10%',
-          borderWidth: 2,
-          borderColor: '#52ADEB',
-          borderRadius: 15,
-          margin: 10,
-          fontSize: 16,
         }}>
-        Tabla de Consumo de AC
-      </Text>
-      {dataRandom.datasets[0].data.length > 0 && (
-        <LineChart
+        <Text
+          style={{
+            color: 'black',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
+            fontWeight: 'bold',
+            fontSize: 20,
+          }}>
+          Cantidad de votos
+        </Text>
+      </View>
+      {dataRandom.data.length > 0 && (
+        <StackedBarChart
           data={dataRandom}
           width={screenWidth}
-          height={220}
-          yAxisSuffix=" Kw"
-          yAxisInterval={1} // optional, defaults to 1
+          height={screenHeight - 200}
           chartConfig={chartConfig}
-          bezier
+          withHorizontalLabels={false}
           style={{
-            backgroundColor: '#ffff',
-            marginVertical: 0,
-            borderRadius: 10,
+            marginVertical: 10,
           }}
         />
       )}
