@@ -9,23 +9,16 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { fsdb, rtdb } from '../config/firebase';
 import {
-  addDoc,
   collection,
   query,
   orderBy,
   limit,
   onSnapshot,
+  updateDoc,
+  getDoc,
+  getDocs,
 } from 'firebase/firestore';
-import {
-  child,
-  get,
-  increment,
-  off,
-  onValue,
-  ref,
-  set,
-  update,
-} from 'firebase/database';
+import { increment, off, onValue, ref, set, update } from 'firebase/database';
 import { screenHeight, screenWidth } from '../utils/Dimensions';
 import { Slider, Icon } from '@rneui/themed';
 import FormButton from '../utils/FormButton';
@@ -39,7 +32,7 @@ const HomeScreen = () => {
   const [comfortStates, setComfortStates] = useState([
     'cold',
     'neutral',
-    'hot',
+    'warm',
   ]);
 
   // Para los botones on off
@@ -72,22 +65,17 @@ const HomeScreen = () => {
     return () => off(recomendation, listener);
   }, []);
 
-  // const prueba = async number => {
-  //   const current_date = new Date();
-  //   await setDoc(doc(fsdb, 'CollectionPrueba', 'Poninmalta'), {
-  //     number: number,
-  //     date: current_date,
-  //     flag: 'por fin se puedo',
-  //   });
-  // };
-
-  const aceptedRecommendation = number => {
+  const aceptedRecommendation = async number => {
     //1 aceptado 0 rechazado
-    const current_date = new Date();
-    addDoc(collection(fsdb, 'AcceptedRecommendations'), {
-      accepted: number,
-      date: current_date,
-    });
+    const flag = true ? number == 1 : false;
+    const recomendatioRef = collection(fsdb, 'recomendations2');
+    const q = query(recomendatioRef, orderBy('date', 'desc'), limit(1));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(doc =>
+      updateDoc(doc.ref, {
+        acceptedRecomendations: flag,
+      }),
+    );
   };
 
   useEffect(() => {

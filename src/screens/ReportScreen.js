@@ -1,15 +1,25 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
-import { StackedBarChart } from 'react-native-chart-kit';
+import { BarChart } from 'react-native-chart-kit';
 import { screenHeight, screenWidth } from '../utils/Dimensions';
+import {
+  collection,
+  limit,
+  onSnapshot,
+  orderBy,
+  query,
+} from 'firebase/firestore';
+import { fsdb } from '../config/firebase';
 
 const ReportScreen = () => {
+  const [votes, setVotes] = useState([]);
+
   const chartConfig = {
     backgroundGradientFrom: '#57c4ea',
     backgroundGradientFromOpacity: 1,
     backgroundGradientTo: '#ffffff',
     backgroundGradientToOpacity: 0.5,
-    color: (opacity = 1) => 'rgba(26, 255, 146, ' + opacity + ')',
+    color: (opacity = 1) => 'rgba(0, 0, 0, ' + opacity + ')',
     labelColor: (opacity = 1) => 'rgba(0, 0, 0, ' + opacity + ')',
     strokeWidth: 3, // optional, default 3
     barPercentage: 0.7,
@@ -17,18 +27,32 @@ const ReportScreen = () => {
     propsForVerticalLabels: { fontWeight: 'bold' },
   };
 
+  useEffect(() => {
+    const comfortVotesRef = collection(fsdb, 'Comfort');
+    const q = query(comfortVotesRef, orderBy('date', 'desc'), limit(1));
+    const unsub = onSnapshot(q, querySnapshot => {
+      console.log('snapshot', querySnapshot);
+      querySnapshot.forEach(doc => {
+        let items = doc.data();
+        setVotes([items.cold, items.neutral, items.warm]);
+      });
+    });
+
+    return () => unsub;
+  }, []);
+
   const dataRandom = {
-    labels: ['MO', 'TU', 'WE', 'TH', 'FR'],
-    legend: ['Cold', 'Neutral', 'Hot'],
-    data: [
-      [60, 60, 60],
-      [30, 30, 60],
-      [30, 30, 60],
-      [30, 30, 60],
-      [30, 30, 60],
+    labels: ['Cold', 'Neutral', 'Warm'],
+    datasets: [
+      {
+        data: votes,
+        colors: [
+          (opacity = 1) => '#359afb',
+          (opacity = 1) => '#a4b0be',
+          (opacity = 1) => '#ea8535',
+        ],
+      },
     ],
-    // color: (opacity = 1) => 'rgba(0, 0, 0, ' + opacity + ')',
-    barColors: ['#359afb', '#a4b0be', '#ea8535'],
   };
 
   return (
@@ -62,13 +86,17 @@ const ReportScreen = () => {
           Cantidad de votos
         </Text>
       </View>
-      {dataRandom.data.length > 0 && (
-        <StackedBarChart
+      {dataRandom.datasets[0].data.length > 0 && (
+        <BarChart
           data={dataRandom}
           width={screenWidth}
           height={screenHeight - 200}
           chartConfig={chartConfig}
           withHorizontalLabels={false}
+          withCustomBarColorFromData={true}
+          flatColor={true}
+          showValuesOnTopOfBars={true}
+          fromZero={true}
           style={{
             marginVertical: 10,
           }}
