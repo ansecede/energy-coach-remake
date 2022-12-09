@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   View,
   Text,
@@ -21,11 +21,12 @@ import {
 import { increment, off, onValue, ref, set, update } from 'firebase/database';
 import { screenHeight, screenWidth } from '../utils/Dimensions';
 import { Slider, Icon } from '@rneui/themed';
-import FormButton from '../utils/FormButton';
+import { AuthContext } from '../utils/AuthContext';
 
 const HomeScreen = () => {
+  const { currentUser } = useContext(AuthContext);
+
   const [controlAC, setControlAC] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
   const [value, setValue] = useState(0);
   const [temperature, setTemperature] = useState(0);
   const [comfort, setComfort] = useState('');
@@ -35,7 +36,7 @@ const HomeScreen = () => {
     'warm',
   ]);
 
-  // Para los botones on off
+  // Para los botones on / off
   let [typeIconOn, setTypeOn] = useState('radio-button-off-sharp');
   let [typeIconOff, setTypeOff] = useState('radio-button-on-sharp');
 
@@ -65,336 +66,39 @@ const HomeScreen = () => {
     return () => off(recomendation, listener);
   }, []);
 
-  const aceptedRecommendation = async number => {
-    //1 aceptado 0 rechazado
-    const flag = true ? number == 1 : false;
+  useEffect(() => {
     const recomendatioRef = collection(fsdb, 'recomendations2');
     const q = query(recomendatioRef, orderBy('date', 'desc'), limit(1));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(doc =>
-      updateDoc(doc.ref, {
-        acceptedRecomendations: flag,
-      }),
-    );
-  };
-
-  useEffect(() => {
-    const recomendatioRef = collection(fsdb, 'recomendations');
-    const q = query(recomendatioRef, orderBy('datetime', 'desc'), limit(1));
     const unsub = onSnapshot(q, querySnapshot => {
-      console.log('snapshot', querySnapshot);
       querySnapshot.forEach(doc => {
         let item = doc.data();
-        // let option = item.option;
-        setControlAC(item.option);
-        console.log('llego una recomendacion');
-        setModalVisible(true);
+        console.log('llego una recomendacion, ejecutando...');
+        setControl(item.option);
       });
     });
 
     return () => unsub;
   }, []);
 
-  const convertCode = value_to_change => {
-    let changed_value;
-    switch (value_to_change) {
-      case 1:
-        changed_value = 22;
-        break;
-      case 3:
-        changed_value = 16;
-        break;
-      case 4:
-        changed_value = 17;
-        break;
-      case 5:
-        changed_value = 18;
-        break;
-      case 6:
-        changed_value = 19;
-        break;
-      case 7:
-        changed_value = 20;
-        break;
-      case 8:
-        changed_value = 21;
-        break;
-      case 9:
-        changed_value = 22;
-        break;
-      case 10:
-        changed_value = 23;
-        break;
-      case 11:
-        changed_value = 24;
-        break;
-      case 24:
-        changed_value = 11;
-        break;
-      case 23:
-        changed_value = 10;
-        break;
-      case 22:
-        changed_value = 9;
-        break;
-      case 21:
-        changed_value = 8;
-        break;
-      case 20:
-        changed_value = 7;
-        break;
-      case 19:
-        changed_value = 6;
-        break;
-      case 18:
-        changed_value = 5;
-        break;
-      case 17:
-        changed_value = 4;
-        break;
-      case 16:
-        changed_value = 3;
-        break;
-    }
-    return changed_value;
+  const cases = [
+    1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 24, 23, 22, 21, 20, 19, 18, 17, 16,
+  ];
+  const correspondingOutput = [
+    22, 16, 17, 18, 19, 20, 21, 22, 23, 24, 11, 10, 9, 8, 7, 6, 5, 4, 3,
+  ];
+
+  const convertCode = valueToChange => {
+    idx = cases.indexOf(valueToChange);
+    return correspondingOutput[idx];
   };
 
-  let recommendation = '';
-  let energy_saving = '';
-
-  switch (controlAC) {
-    case 1:
-      recommendation = 'Encender AC';
-      energy_saving = '0%';
-      break;
-    case 2:
-      recommendation = 'Apagar AC';
-      energy_saving = '10%';
-      break;
-    case 3:
-      recommendation = 'Cambiar temperatura a 16º';
-      energy_saving = '5%';
-      break;
-    case 4:
-      recommendation = 'Cambiar temperatura a 17º';
-      energy_saving = '0%';
-      break;
-    case 5:
-      recommendation = 'Cambiar temperatura a 18º';
-      energy_saving = '0%';
-      break;
-    case 6:
-      recommendation = 'Cambiar temperatura a 19º';
-      energy_saving = '0%';
-      break;
-    case 7:
-      recommendation = 'Cambiar temperatura a 20º';
-      energy_saving = '0%';
-      break;
-    case 8:
-      recommendation = 'Cambiar temperatura a 21º';
-      energy_saving = '0%';
-      break;
-    case 9:
-      recommendation = 'Cambiar temperatura a 22º';
-      energy_saving = '0%';
-      break;
-    case 10:
-      recommendation = 'Cambiar temperatura a 23º';
-      energy_saving = '0%';
-      break;
-    case 11:
-      recommendation = 'Cambiar temperatura a 24º';
-      energy_saving = '0%';
-      break;
-    case 11:
-      recommendation = 'Mantener estadoº';
-      energy_saving = '0%';
-      break;
-  }
-
   return (
-    // Modal o pop up de notificación
     <View
       style={{
         width: '100%',
         height: '100%',
         backgroundColor: '#FFFFFF',
       }}>
-      <Modal animationType="slide" transparent={true} visible={modalVisible}>
-        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <View
-            style={{
-              height: '80%',
-              aspectRatio: 1 / 1.2,
-              margin: 20,
-              backgroundColor: 'white',
-              borderRadius: 20,
-              padding: 35,
-              alignItems: 'center',
-              shadowColor: '#000',
-              shadowOffset: {
-                width: 0,
-                height: 2,
-              },
-              shadowOpacity: 0.25,
-              shadowRadius: 4,
-              elevation: 5,
-            }}>
-            <View style={{ marginBottom: 20 }}>
-              <Text
-                style={{
-                  color: '#295675',
-                  fontWeight: 'bold',
-                  fontSize: 20,
-                }}>
-                {' '}
-                Recomendacion Pendiente
-              </Text>
-            </View>
-            <View
-              style={{
-                //flex: 1,
-                // justifyContent: "space-between",
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '100%',
-                aspectRatio: 6 / 1,
-                borderWidth: 2.5,
-                borderStyle: 'solid',
-                borderColor: '#52ADEB',
-                borderRadius: 10,
-                marginTop: 10,
-              }}>
-              <Text
-                style={{ fontWeight: 'bold', fontSize: 20, color: 'black' }}>
-                {recommendation}
-              </Text>
-            </View>
-            <View
-              style={{
-                width: '100%',
-                height: 175 / 1,
-                borderWidth: 2.5,
-                borderStyle: 'solid',
-                borderColor: '#52ADEB',
-                borderRadius: 10,
-                marginTop: 30,
-                marginBottom: 30,
-              }}>
-              {/* Flex para poner la ubicacion horizontalmente */}
-              <View
-                style={{
-                  flexDirection: 'row',
-                  width: '100%',
-                  height: '50%',
-                  justifyContent: 'space-evenly',
-                  borderBottomWidth: 2,
-                  borderBottomColor: '#52ADEB',
-                }}>
-                <View
-                  style={{ justifyContent: 'center', alignItems: 'center' }}>
-                  <Text style={{ color: 'black' }}>Edificio 16A</Text>
-                </View>
-                {/* Linea divisora */}
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignSelf: 'center',
-                    width: 1.5,
-                    height: '70%',
-                    backgroundColor: 'gray',
-                  }}></View>
-                <View style={{ justifyContent: 'center' }}>
-                  <Text style={{ textAlign: 'center', color: 'black' }}>
-                    Lab. de Sistemas Telemáticos
-                  </Text>
-                </View>
-              </View>
-              {/* Ahorro energetico */}
-              <View
-                style={{
-                  width: '100%',
-                  height: '50%',
-                  justifyContent: 'center',
-                }}>
-                <Text
-                  style={{ textAlign: 'center', fontSize: 20, color: 'black' }}>
-                  Ahorro Energético esperado:
-                </Text>
-                <Text
-                  style={{
-                    textAlign: 'center',
-                    fontSize: 30,
-                    padding: 5,
-                    color: '#295675',
-                  }}>
-                  {energy_saving}
-                </Text>
-              </View>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  marginTop: 15,
-                  width: '100%',
-                  justifyContent: 'space-around',
-                }}>
-                <View
-                  style={{
-                    width: '60%',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}>
-                  <FormButton
-                    buttonTitle="Aceptar"
-                    onPress={() => {
-                      setControl().then(r => console.log('se envió control'));
-                      setModalVisible(!modalVisible);
-                      aceptedRecommendation(1);
-                    }}
-                  />
-                </View>
-                <View
-                  style={{
-                    width: '60%',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}>
-                  <FormButton
-                    buttonTitle="Rechazar"
-                    onPress={() => {
-                      setModalVisible(!modalVisible);
-                      aceptedRecommendation(0);
-                    }}
-                  />
-                </View>
-              </View>
-              {/* <View>
-                <View>
-                  <FormButton
-                    buttonTitle="Aceptar"
-                    // onPress={() => {
-                    //   setControl().then(r => console.log('se envió control'));
-                    //   setModalVisible(!modalVisible);
-                    //   aceptedRecommendation(1);
-                    // }}
-                  />
-                </View>
-                <View>
-                  <FormButton
-                    buttonTitle="Rechazar"
-                    // onPress={() => {
-                    //   setModalVisible(!modalVisible);
-                    //   aceptedRecommendation(0);
-                    // }}
-                  />
-                </View>
-              </View> */}
-            </View>
-          </View>
-        </View>
-      </Modal>
-
       {/* PANTALLA PRINCIPAL */}
       <>
         <View
@@ -440,12 +144,7 @@ const HomeScreen = () => {
               justifyContent: 'center',
               paddingTop: 10,
             }}>
-            <TouchableHighlight
-              onPress={() =>
-                setControl(1).then(r => console.log('se encendió AC'))
-              }
-              underlayColor="transparent"
-              activeOpacity={0}>
+            <TouchableHighlight underlayColor="transparent" activeOpacity={0}>
               <View
                 style={{
                   flex: 1,
@@ -459,6 +158,7 @@ const HomeScreen = () => {
                       setTypeOn('radio-button-on-sharp');
                       setTypeOff('radio-button-off-sharp');
                     }
+                    setControl(1).then(r => console.log('se encendió AC'));
                   }}
                   style={{ paddingLeft: 7, height: '90%' }}
                   name={typeIconOn}
@@ -475,12 +175,7 @@ const HomeScreen = () => {
                 </Text>
               </View>
             </TouchableHighlight>
-            <TouchableHighlight
-              onPress={() =>
-                setControl(2).then(r => console.log('se apagó AC'))
-              }
-              underlayColor="transparent"
-              activeOpacity={0}>
+            <TouchableHighlight underlayColor="transparent" activeOpacity={0}>
               <View
                 style={{
                   flex: 1,
@@ -493,6 +188,7 @@ const HomeScreen = () => {
                       setTypeOff('radio-button-on-sharp');
                       setTypeOn('radio-button-off-sharp');
                     }
+                    setControl(2).then(r => console.log('se apagó AC'));
                   }}
                   style={{ paddingLeft: 5, height: '90%' }}
                   name={typeIconOff}
@@ -573,7 +269,7 @@ const HomeScreen = () => {
               textAlign: 'center',
               fontSize: 20,
             }}>
-            Estado de confort: {comfort}
+            Selecciona tu estado de confort:
           </Text>
         </View>
         <View
@@ -645,64 +341,5 @@ const HomeScreen = () => {
     </View>
   );
 };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     width: '125%',
-//     alignSelf: 'flex-start',
-//     marginTop: 60,
-//   },
-//   buttonContainer: {
-//     width: '55%',
-//     aspectRatio: 2 / 1,
-//   },
-//   modalView: {
-//     margin: 20,
-//     backgroundColor: 'white',
-//     borderRadius: 20,
-//     padding: 35,
-//     alignItems: 'center',
-//     shadowColor: '#000',
-//     shadowOffset: {
-//       width: 0,
-//       height: 2,
-//     },
-//     shadowOpacity: 0.25,
-//     shadowRadius: 4,
-//     elevation: 5,
-//   },
-//   centeredView: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     marginTop: 22,
-//   },
-//   contentView: {
-//     padding: 20,
-//     width: '100%',
-//     justifyContent: 'center',
-//     alignItems: 'stretch',
-//   },
-//   button: {
-//     marginTop: 10,
-//     width: '95%',
-//     //height: windowHeight / 5,
-//     backgroundColor: '#32A9E9',
-//     padding: 10,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     borderRadius: 5,
-//   },
-//   buttonText: {
-//     fontSize: 18,
-//     fontWeight: 'bold',
-//     color: '#ffffff',
-//     fontFamily: 'Lato-Regular',
-//   },
-// });
 
 export default HomeScreen;

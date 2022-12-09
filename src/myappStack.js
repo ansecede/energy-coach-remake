@@ -63,7 +63,6 @@ const AppStack = () => (
 const AppNavigator = () => {
   const { currentUser } = useContext(AuthContext);
   const isSignedIn = !!currentUser?.email;
-  console.log(isSignedIn);
 
   return (
     <>
