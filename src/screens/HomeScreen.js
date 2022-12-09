@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TouchableHighlight,
-} from 'react-native';
+import { View, Text, TouchableHighlight } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { fsdb, rtdb } from '../config/firebase';
 import {
@@ -14,27 +8,20 @@ import {
   orderBy,
   limit,
   onSnapshot,
-  updateDoc,
-  getDoc,
-  getDocs,
 } from 'firebase/firestore';
 import { increment, off, onValue, ref, set, update } from 'firebase/database';
 import { screenHeight, screenWidth } from '../utils/Dimensions';
 import { Slider, Icon } from '@rneui/themed';
 import { AuthContext } from '../utils/AuthContext';
+import EStyleSheet from 'react-native-extended-stylesheet';
 
 const HomeScreen = () => {
   const { currentUser } = useContext(AuthContext);
 
-  const [controlAC, setControlAC] = useState([]);
   const [value, setValue] = useState(0);
   const [temperature, setTemperature] = useState(0);
-  const [comfort, setComfort] = useState('');
-  const [comfortStates, setComfortStates] = useState([
-    'cold',
-    'neutral',
-    'warm',
-  ]);
+  const [sliderDisabled, setSliderDisabled] = useState(false);
+  const comfortStates = ['cold', 'neutral', 'warm'];
 
   // Para los botones on / off
   let [typeIconOn, setTypeOn] = useState('radio-button-off-sharp');
@@ -42,14 +29,20 @@ const HomeScreen = () => {
 
   const left = ((value - 16) * (screenWidth - 33)) / 9;
 
-  const setControl = async ac_value => {
+  const setRec = async ac_value => {
     set(ref(rtdb, '/recomendation'), {
       rec: ac_value ? ac_value : controlAC,
     });
   };
 
+  // const getRec = async ac_value => {
+  //   set(ref(rtdb, '/recomendation'), {
+  //     rec: ac_value ? ac_value : controlAC,
+  //   });
+  // };
+
   const incrementUserComfort = async value => {
-    const comfortState = comfortStates[value];
+    let comfortState = comfortStates[value];
     const dbRef = ref(rtdb, '/comfort');
 
     await update(dbRef, {
@@ -73,7 +66,7 @@ const HomeScreen = () => {
       querySnapshot.forEach(doc => {
         let item = doc.data();
         console.log('llego una recomendacion, ejecutando...');
-        setControl(item.option);
+        setRec(item.option);
       });
     });
 
@@ -95,123 +88,130 @@ const HomeScreen = () => {
   return (
     <View
       style={{
-        width: '100%',
-        height: '100%',
+        width: screenWidth,
+        height: screenHeight,
         backgroundColor: '#FFFFFF',
+        alignItems: 'center',
       }}>
-      {/* PANTALLA PRINCIPAL */}
       <>
+        {/* Icono copo_nieve */}
         <View
           style={{
-            flex: 0.75,
-            width: '100%',
-            height: '60%',
-            justifyContent: 'center',
+            width: '29%',
+            height: '20%',
+
             alignItems: 'center',
+            justifyContent: 'center',
+            marginTop: screenHeight * 0.025,
           }}>
-          {/* Icono copo_nieve, Texto Temp y temperatura actual */}
-          <View style={{ marginTop: 20 }}>
-            <Ionicons name="snow-sharp" size={140} color="#2faeea" />
-            <Text
-              style={{
-                paddingTop: 10,
-                fontWeight: 'bold',
-                fontSize: 20,
-                textAlign: 'center',
-                color: 'black',
-              }}>
-              Temp:
-            </Text>
-            <Text
-              style={{
-                paddingTop: 10,
-                fontWeight: 'bold',
-                fontSize: 40,
-                textAlign: 'center',
-                color: 'black',
-              }}>
-              {convertCode(temperature)
-                ? convertCode(temperature) + 'ºC'
-                : 'OFF'}
-            </Text>
-          </View>
-          {/* Botones ON y OFF */}
+          <Ionicons name="snow-sharp" size={120} color="#2faeea" />
+        </View>
+        {/*  Texto Temp */}
+        <View
+          style={{
+            width: '50%',
+            height: '5%',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginTop: screenHeight * 0.01,
+          }}>
+          <Text style={styles.title_text}>Temperatura del AC: </Text>
+        </View>
+        {/* Temperatura actual */}
+        <View
+          style={{
+            width: '50%',
+            height: '7%',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginTop: screenHeight * 0.01,
+          }}>
+          <Text style={styles.display_text}>
+            {' '}
+            {convertCode(temperature)
+              ? convertCode(temperature) + 'ºC'
+              : 'OFF'}{' '}
+          </Text>
+        </View>
+        {/* Contenedor horizontal para botones  */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            height: '15%',
+            width: '50%',
+          }}>
+          {/* Boton ON */}
           <View
             style={{
-              flex: 1,
-              flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'center',
-              paddingTop: 10,
+              height: '100%',
             }}>
-            <TouchableHighlight underlayColor="transparent" activeOpacity={0}>
-              <View
-                style={{
-                  flex: 1,
-                  marginRight: 50,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Ionicons
-                  onPress={() => {
-                    if (typeIconOn === 'radio-button-off-sharp') {
-                      setTypeOn('radio-button-on-sharp');
-                      setTypeOff('radio-button-off-sharp');
-                    }
-                    setControl(1).then(r => console.log('se encendió AC'));
-                  }}
-                  style={{ paddingLeft: 7, height: '90%' }}
-                  name={typeIconOn}
-                  size={80}
-                  color="#2faeea"
-                />
-                <Text
-                  style={{
-                    fontWeight: 'bold',
-                    color: 'black',
-                    textAlign: 'center',
-                  }}>
-                  ON
-                </Text>
-              </View>
+            <TouchableHighlight
+              underlayColor="transparent"
+              activeOpacity={0}
+              style={{
+                height: '77%',
+              }}>
+              <Ionicons
+                onPress={() => {
+                  if (typeIconOn === 'radio-button-off-sharp') {
+                    setTypeOn('radio-button-on-sharp');
+                    setTypeOff('radio-button-off-sharp');
+                  }
+                  setRec(1).then(r => console.log('se encendió AC'));
+                  setTemperature(0);
+                  setSliderDisabled(false);
+                }}
+                name={typeIconOn}
+                size={80}
+                color="#2faeea"
+              />
             </TouchableHighlight>
-            <TouchableHighlight underlayColor="transparent" activeOpacity={0}>
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Ionicons
-                  onPress={() => {
-                    if (typeIconOff === 'radio-button-off-sharp') {
-                      setTypeOff('radio-button-on-sharp');
-                      setTypeOn('radio-button-off-sharp');
-                    }
-                    setControl(2).then(r => console.log('se apagó AC'));
-                  }}
-                  style={{ paddingLeft: 5, height: '90%' }}
-                  name={typeIconOff}
-                  size={80}
-                  color="#2faeea"
-                />
-                <Text
-                  style={{
-                    fontWeight: 'bold',
-                    color: 'black',
-                    textAlign: 'center',
-                  }}>
-                  OFF
-                </Text>
-              </View>
+            <View style={styles.caption_container}>
+              <Text style={styles.caption_text}>ON</Text>
+            </View>
+          </View>
+          {/* Boton OFF */}
+          <View
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+            }}>
+            <TouchableHighlight
+              underlayColor="transparent"
+              activeOpacity={0}
+              style={{
+                height: '77%',
+              }}>
+              <Ionicons
+                onPress={() => {
+                  if (typeIconOff === 'radio-button-off-sharp') {
+                    setTypeOff('radio-button-on-sharp');
+                    setTypeOn('radio-button-off-sharp');
+                  }
+                  setRec(2).then(r => console.log('se apagó AC'));
+                  setSliderDisabled(true);
+                }}
+                name={typeIconOff}
+                size={80}
+                color="#2faeea"
+              />
             </TouchableHighlight>
+            <View style={styles.caption_container}>
+              <Text style={styles.caption_text}>OFF</Text>
+            </View>
           </View>
         </View>
         {/* Slidebar */}
         <View
           style={{
-            paddingLeft: 30,
-            paddingRight: 30,
+            marginTop: screenHeight * 0.015,
+            width: '90%',
+            height: '10%',
           }}>
           <Text
             style={{
@@ -230,11 +230,12 @@ const HomeScreen = () => {
             maximumValue={24}
             minimumValue={16}
             step={1}
-            onSlidingComplete={value => {
-              let codeAC = convertCode(value);
-              setControl(codeAC).then(console.log('se cambió temp a:', value));
+            onSlidingComplete={displayedTempSlider => {
+              let recCode = convertCode(displayedTempSlider);
+              setRec(recCode).then(console.log('se cambió temp a:', value));
             }}
-            allowTouchTrack
+            allowTouchTrack={!sliderDisabled}
+            disabled={sliderDisabled}
             trackStyle={{ height: 5, backgroundColor: 'transparent' }}
             thumbStyle={{
               height: 20,
@@ -255,91 +256,100 @@ const HomeScreen = () => {
             }}
           />
         </View>
-        {/* Iconos finales para eleccion del confort */}
-        <View
-          style={{
-            marginTop: 10,
-            alignItem: 'center',
-            justifyContent: 'center',
-          }}>
-          <Text
-            style={{
-              fontWeight: 'bold',
-              color: 'black',
-              textAlign: 'center',
-              fontSize: 20,
-            }}>
+        {/* TEXTO: Selecciona tu estado de confort: */}
+        <View style={{}}>
+          <Text style={styles.title_text}>
             Selecciona tu estado de confort:
           </Text>
         </View>
+        {/* Iconos finales para eleccion del comfort */}
         <View
           style={{
-            flex: 0.3,
             flexDirection: 'row',
-            alignItem: 'center',
-            justifyContent: 'center',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            height: '15%',
+            width: '80%',
+            marginTop: screenHeight * 0.02,
           }}>
           {/* Frio */}
-          <TouchableHighlight
-            onPress={() => {
-              incrementUserComfort(0).then(setComfort('Frio'));
-            }}
-            underlayColor="transparent"
-            activeOpacity={0}>
-            <View style={{ flex: 1, margin: 20 }}>
+          <View style={styles.button_text_container}>
+            <TouchableHighlight
+              onPress={() => {
+                incrementUserComfort(0);
+              }}
+              underlayColor="transparent"
+              activeOpacity={0}>
               <Ionicons name="snow-outline" size={80} color="#2faeea" />
-              <Text
-                style={{
-                  fontWeight: 'bold',
-                  color: 'black',
-                  textAlign: 'center',
-                }}>
-                FRIO
-              </Text>
+            </TouchableHighlight>
+            <View style={styles.caption_container}>
+              <Text style={styles.caption_text}>FRIO</Text>
             </View>
-          </TouchableHighlight>
+          </View>
           {/* Neutral */}
-          <TouchableHighlight
-            onPress={() => {
-              incrementUserComfort(1).then(setComfort('Neutral'));
-            }}
-            underlayColor="transparent"
-            activeOpacity={0}>
-            <View style={{ flex: 1, margin: 20 }}>
+          <View style={styles.button_text_container}>
+            <TouchableHighlight
+              onPress={() => {
+                incrementUserComfort(1);
+              }}
+              underlayColor="transparent"
+              activeOpacity={0}>
               <Ionicons name="happy-outline" size={80} color="#D4AC0D" />
-              <Text
-                style={{
-                  fontWeight: 'bold',
-                  color: 'black',
-                  textAlign: 'center',
-                }}>
-                NEUTRAL
-              </Text>
+            </TouchableHighlight>
+            <View style={styles.caption_container}>
+              <Text style={styles.caption_text}>NEUTRAL</Text>
             </View>
-          </TouchableHighlight>
+          </View>
           {/* Calor */}
-          <TouchableHighlight
-            onPress={() => {
-              incrementUserComfort(2).then(setComfort('Calor'));
-            }}
-            underlayColor="transparent"
-            activeOpacity={0}>
-            <View style={{ flex: 1, margin: 20 }}>
+          <View style={styles.button_text_container}>
+            <TouchableHighlight
+              onPress={() => {
+                incrementUserComfort(2);
+              }}
+              underlayColor="transparent"
+              activeOpacity={0}>
               <Ionicons name="flame" size={80} color="#E67E22" />
-              <Text
-                style={{
-                  fontWeight: 'bold',
-                  color: 'black',
-                  textAlign: 'center',
-                }}>
-                CALOR
-              </Text>
+            </TouchableHighlight>
+            <View style={styles.caption_container}>
+              <Text style={styles.caption_text}>CALOR</Text>
             </View>
-          </TouchableHighlight>
+          </View>
         </View>
       </>
     </View>
   );
 };
+
+EStyleSheet.build({
+  $rem: screenWidth > 340 ? 18 : 16,
+});
+
+const styles = EStyleSheet.create({
+  title_text: {
+    fontSize: '1.1rem',
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  display_text: {
+    fontSize: '2.1rem',
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  caption_text: {
+    fontSize: '0.8rem',
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  caption_container: {
+    height: '20%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  button_text_container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+  },
+});
 
 export default HomeScreen;

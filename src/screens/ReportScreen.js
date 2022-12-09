@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
 import { screenHeight, screenWidth } from '../utils/Dimensions';
@@ -10,8 +10,10 @@ import {
   query,
 } from 'firebase/firestore';
 import { fsdb } from '../config/firebase';
+import { AuthContext } from '../utils/AuthContext';
 
 const ReportScreen = () => {
+  const { currentUser } = useContext(AuthContext);
   const [votes, setVotes] = useState([]);
 
   const chartConfig = {
