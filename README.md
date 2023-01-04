@@ -13,6 +13,10 @@ Having a code base was a great advantage for the development of the application,
 ![Alt text](/Screenshots/HomeScreen.jpg?raw=true "Home Screen")
 ![Alt text](/Screenshots/ProfileScreen.jpg?raw=true "Home Screen")
 
+Another important detail to mention is that due to inexperience with Git and Github, we uploaded to the remote repository in a branch called master, instead of the main branch, so if you want to check the code you have to change branches.
+
+Lastly, the code is quite amateurish or newbie, as it was the first time for both the original creators and myself using React, and even for me one of the first times I've touched JavaScript. So don't be so harsh xD.
+
 
 ## Some details about our version of the app
 Our version of the app doesn't really change anything aesthetic-wise, just, as I mentioned, that it adjusts to any screen. On the other hand, logic-wise, our app now focuses on ensuring the comfort of people in an environment, where the only input variables will be: how the user feels at the moment (hot, cold or neutral), the air conditioning temperature and outdoor temperature. For the first variable, the comfort buttons were modified. Now pressing one counts as a vote that is counted in the database and after 15 minutes, it is compared which of the 3 values has the highest number of votes to perform an action that improves comfort. The latter is done in the backend, the application only registers the votes in the database.
